@@ -15,7 +15,7 @@ def handler(event,context):
     month = today.month
     year = today.year
     current_time = datetime.datetime.now().strftime("%H:%M:%S")
-    path = str(year) + "/" + str(month) + "/" + str(day)
+    path = str(year) + "-" + str(month) + "/" + str(day)
 
     print(current_time)
     print(event)
@@ -30,7 +30,7 @@ def handler(event,context):
     # Store the data in S3 (modify bucket name and key)
     s3_client.put_object(
         Bucket=bucket_name,
-        Key=f"cdk/{path}-{current_time}aws.log",  # Replace with appropriate key structure
+        Key=f"cdk/{path}/{current_time}aws.log",  # Replace with appropriate key structure
         Body=str(data_to_store)
     )
 
