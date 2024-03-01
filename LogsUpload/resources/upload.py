@@ -4,6 +4,8 @@ import os
 import datetime
 
 bucket_name = os.environ['BUCKET']
+
+# Use boto3 to interact with S3
 s3_client = boto3.client("s3")
 
 print(bucket_name)
@@ -25,7 +27,6 @@ def handler(event,context):
     # Extract data from the request body (modify based on your needs)
     data_to_store = request_body["data"]
     print("***********************************",data_to_store)
-    # Use boto3 to interact with S3
     
     # Store the data in S3 (modify bucket name and key)
     s3_client.put_object(
