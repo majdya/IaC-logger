@@ -9,8 +9,17 @@ s3_client = boto3.client("s3")
 print(bucket_name)
 
 def handler(event,context):
+    # Extract day, month, and year to build the path
+    today = datetime.date.today()
+    day = today.day
+    month = today.month
+    year = today.year
+    current_time = datetime.datetime.now().strftime("%H:%M:%S")
+    path = str(year) + "/" + str(month) + "/" + str(day)
+
+    print(current_time)
     print(event)
-    now = str(datetime.datetime.now())
+    
     # Get the request body
     request_body = json.loads(event["body"])
     # Extract data from the request body (modify based on your needs)
@@ -21,8 +30,8 @@ def handler(event,context):
     # Store the data in S3 (modify bucket name and key)
     s3_client.put_object(
         Bucket=bucket_name,
-        Key="cdk/aws.log.txt",  # Replace with appropriate key structure
-        Body=str(now,": ",data_to_store)
+        Key=f"cdk/{path}-{current_time}aws.log",  # Replace with appropriate key structure
+        Body=str(data_to_store)
     )
 
     return {
