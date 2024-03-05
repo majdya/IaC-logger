@@ -1,0 +1,11 @@
+POST: https://qaw6itthejbynf3dxd3ugd5vhpe0gvwmt.lambda-url.eu-central-1.on.aws/
+
+Load:
+{
+   "log":{
+   "userId":"user1122",
+   "deviceMac":"aabbcc111122",
+   "temp":"50",
+   "moredata":"more data example"
+   }
+}
