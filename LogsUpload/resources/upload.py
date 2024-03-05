@@ -17,16 +17,10 @@ def handler(event,context):
     month = today.month
     year = today.year
     current_time = datetime.datetime.now().strftime("%H:%M:%S")
-    path = str(year) + "-" + str(month) + "/" + str(day)
-
-    print(current_time)
-    print(event)
-    
+    path = str(year) + "-" + str(month) + "/" + str(day)    
     # Get the request body
-    request_body = json.loads(event["body"])
-    # Extract data from the request body (modify based on your needs)
-    data_to_store = request_body["data"]
-    print("***********************************",data_to_store)
+    body = json.loads(event['body'])
+    data_to_store=body["log"]
     
     # Store the data in S3 (modify bucket name and key)
     s3_client.put_object(
