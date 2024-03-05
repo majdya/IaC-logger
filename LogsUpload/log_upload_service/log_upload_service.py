@@ -10,8 +10,9 @@ class LogUploadService(Construct):
         super().__init__(scope, id)
 
         bucket = s3.Bucket(self, "UploadHandler")
+        bucket2 = s3.Bucket(self, "CompressHandler")
 
-        handler = lambda_.Function(self, "bucket",
+        uploadHandler = lambda_.Function(self, "bucket",
                     runtime=lambda_.Runtime.PYTHON_3_11,
                     code=lambda_.Code.from_asset("resources"),
                     handler="upload.handler",
@@ -19,20 +20,30 @@ class LogUploadService(Construct):
                     BUCKET=bucket.bucket_name)
                     )
 
-        bucket.grant_read_write(handler)
+        bucket.grant_read_write(uploadHandler)
 
         api = apigateway.RestApi(self, "upload-api",
                   rest_api_name="Upload Service",
                   description="This service serves uploaded logs.")
 
-        upload_integration = apigateway.LambdaIntegration(handler,
+        upload_integration = apigateway.LambdaIntegration(uploadHandler,
                 request_templates={"application/json": '{ "statusCode": "200" }'})
 
-        # api.root.add_method("GET", get_widgets_integration)   # GET /
         api.root.add_method("POST", upload_integration)   # POST /
-        
 
-        notification = aws_s3_notifications.LambdaDestination(handler)
+        compressHandler = lambda_.Function(self, "bucket2",
+                    runtime=lambda_.Runtime.PYTHON_3_11,
+                    code=lambda_.Code.from_asset("resources"),
+                    handler="compress.handler",
+                    environment=dict(
+                    BUCKET=bucket.bucket_name,
+                    DEST=bucket2.bucket_name)
+                    )
+
+        bucket.grant_read(compressHandler)
+        bucket2.grant_read_write(compressHandler)
+
+        notification = aws_s3_notifications.LambdaDestination(compressHandler)
 
         bucket.add_event_notification(s3.EventType.OBJECT_CREATED, notification)
         # widget = api.root.add_resource("/compress")
