@@ -8,8 +8,6 @@ bucket_name = os.environ['BUCKET']
 # Use boto3 to interact with S3
 s3_client = boto3.client("s3")
 
-print(bucket_name)
-
 def handler(event,context):
     # Extract day, month, and year to build the path
     today = datetime.date.today()
@@ -17,18 +15,23 @@ def handler(event,context):
     month = today.month
     year = today.year
     current_time = datetime.datetime.now().strftime("%H:%M:%S")
-    path = str(year) + "-" + str(month) + "/" + str(day)    
+    path = str(year) + "-" + str(month) + "/" + str(day)
+    
     # Get the request body
     body = json.loads(event['body'])
+    #get userId to add to key
+    userId = body["userId"]
+
+    #get log info
     data_to_store=body["log"]
     
-    # Store the data in S3 (modify bucket name and key)
+    #s3 upload
     s3_client.put_object(
         Bucket=bucket_name,
-        Key=f"cdk/{path}/{current_time}aws.log",  # Replace with appropriate key structure
+        Key=f"cdk/{path}/{userId}/{current_time}aws.log",  # Replace with appropriate key structure
         Body=str(data_to_store)
     )
-
+    
     return {
         "statusCode": 200,
         "body": json.dumps({"message": "Data stored successfully!"})
