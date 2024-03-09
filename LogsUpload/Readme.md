@@ -138,3 +138,5 @@ Follow the steps below to deploy to AWS
 - `cdk bootstrap aws://${account}/${region}`- Setup aws account
 - `cdk synth` - Generate cloud formation template
 - `cdk deploy` - deploy to the aws account
+
+exposing the function url still requried to be done manullay
