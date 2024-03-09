@@ -18,100 +18,38 @@ def handler(event,context):
     path = str(year) + "-" + str(month) + "/" + str(day)
     
     # Get the request body
-    body = json.loads(event['body'])
-    #get userId to add to key
-    userId = body["userId"]
-
+    try:
+        body = json.loads(event['body'])
+        #get userId to add to key
+        userId = body["userId"]
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': str(e)+": Requred filed missing"
+        }
+        
     #get log info
-    data_to_store=body["log"]
-    
+    try:
+        data_to_store=body["log"]
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': str(e)+": Requred filed missing"
+        }
     #s3 upload
-    s3_client.put_object(
-        Bucket=bucket_name,
-        Key=f"cdk/{path}/{userId}/{current_time}aws.log",  # Replace with appropriate key structure
-        Body=str(data_to_store)
-    )
-    
+    try:
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=f"cdk/{path}/{userId}/{current_time}.aws.log",  
+            Body=str(data_to_store)
+        )
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': str(e)+": Fail wo write to s3"
+        }
+        
     return {
         "statusCode": 200,
         "body": json.dumps({"message": "Data stored successfully!"})
     }
-
-# 
-# 
-# from botocore.exceptions import ClientError
-
-# s3 = boto3.client('s3')
-# bucket_name = os.environ['BUCKET']
-
-# def lambda_handler(event, context):
-#     print(event)
-#     try:
-#         method = event['httpMethod']
-#         widget_name = event['pathParameters'].get('proxy')
-
-#         if method == "GET":
-#             if event['path'] == "/":
-#                 print(" **** GET: Path: / **** ")
-#                 data = s3.list_objects_v2(Bucket=bucket_name)
-#                 body = {
-#                     "widgets": [obj['Key'] for obj in data['Contents']]
-#                 }
-#                 return {
-#                     'statusCode': 200,
-#                     'body': json.dumps(body)
-#                 }
-
-#             if widget_name:
-#                 print(" **** GET: Path: /widget_name **** ")
-
-#                 data = s3.get_object(Bucket=bucket_name, Key=widget_name)
-#                 body = data['Body'].read().decode('utf-8')
-#                 return {
-#                     'statusCode': 200,
-#                     'body': json.dumps(body)
-#                 }
-
-#         if method == "POST":
-#             if not widget_name:
-#                 return {
-#                     'statusCode': 400,
-#                     'body': "Widget name missing"
-#                 }
-
-#             now = str(datetime.datetime.now())
-#             data = widget_name + " created: " + now
-#             s3.put_object(Bucket=bucket_name, Key=widget_name, Body=data.encode('utf-8'), ContentType='application/json')
-#             return {
-#                 'statusCode': 200,
-#                 'body': data
-#             }
-
-#         if method == "DELETE":
-#             if not widget_name:
-#                 return {
-#                     'statusCode': 400,
-#                     'body': "Widget name missing"
-#                 }
-
-#             s3.delete_object(Bucket=bucket_name, Key=widget_name)
-#             return {
-#                 'statusCode': 200,
-#                 'body': "Successfully deleted widget " + widget_name
-#             }
-
-#         return {
-#             'statusCode': 400,
-#             'body': "We only accept GET, POST, and DELETE, not " + method
-#         }
-
-#     except ClientError as e:
-#         return {
-#             'statusCode': 400,
-#             'body': e.response['Error']['Message']
-#         }
-#     except Exception as e:
-#         return {
-#             'statusCode': 400,
-#             'body': str(e)
-#         }
